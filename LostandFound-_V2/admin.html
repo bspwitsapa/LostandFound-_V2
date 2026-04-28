@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | SAPA Lost and Found</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="bg-blob blob-1"></div>
+    <div class="bg-blob blob-2"></div>
+
+    <nav class="navbar">
+        <div class="navbar-brand" onclick="window.location.href='index.html'">
+            <div class="logo-wrapper"><img src="images/sapa.png" alt="SAPA Logo" class="navbar-logo"></div>
+            <div class="navbar-text-group"><span class="navbar-title">Admin Dashboard</span></div>
+        </div>
+        <div class="navbar-right">
+            <button class="btn btn-login" onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <section class="container">
+        <div class="section-header">
+            <h2 class="section-title">สถิติระบบ</h2>
+            <div class="section-line"></div>
+        </div>
+        
+        <div class="stat-grid">
+            <div class="stat-card" style="border-color: var(--primary-red);">
+                <span class="stat-val" id="stat-lost" style="color: var(--primary-red);">0</span>
+                <span class="stat-label">รายการของหาย</span>
+            </div>
+            <div class="stat-card" style="border-color: var(--primary-green);">
+                <span class="stat-val" id="stat-found" style="color: var(--primary-green);">0</span>
+                <span class="stat-label">รายการที่พบ</span>
+            </div>
+            <div class="stat-card" style="border-color: var(--primary-blue);">
+                <span class="stat-val" id="stat-returned" style="color: var(--primary-blue);">0</span>
+                <span class="stat-label">ส่งคืนสำเร็จ</span>
+            </div>
+        </div>
+
+        <h3>รายการทั้งหมด</h3>
+        <div id="admin-all-list" class="items-grid" style="margin-top: 20px;"></div>
+    </section>
+
+    <script src="app.js"></script>
+    <script>
+        if (!currentUser || currentUser.role !== 'admin') window.location.href = 'index.html';
+
+        function markReturned(id) {
+            const idx = reports.findIndex(r => r.id === id);
+            if (idx !== -1) {
+                reports[idx].status = 'returned';
+                localStorage.setItem('sapa_reports', JSON.stringify(reports));
+                renderAdmin();
+            }
+        }
+
+        function renderAdmin() {
+            const lost = reports.filter(r => r.type === 'lost').length;
+            const found = reports.filter(r => r.type === 'found').length;
+            const returned = reports.filter(r => r.status === 'returned').length;
+            document.getElementById('stat-lost').innerText = lost;
+            document.getElementById('stat-found').innerText = found;
+            document.getElementById('stat-returned').innerText = returned;
+
+            const list = document.getElementById('admin-all-list');
+            list.innerHTML = '';
+            reports.forEach(r => {
+                list.innerHTML += `
+                    <div class="item-card" style="opacity: ${r.status === 'returned' ? '0.6' : '1'}">
+                        <div class="item-img-placeholder">
+                            <i class="fa-solid ${r.type === 'lost' ? 'fa-magnifying-glass' : 'fa-box'}"></i>
+                            <span class="item-type-badge badge-${r.type}">${r.type}</span>
+                        </div>
+                        <div class="item-content">
+                            <div class="item-status-row">
+                                <span class="status-badge status-${r.status}">${r.status}</span>
+                            </div>
+                            <span class="item-title">${r.name}</span>
+                            <div class="item-details">
+                                <div class="item-detail-row"><i class="fa-solid fa-user"></i> ID: ${r.reporter}</div>
+                                <div class="item-detail-row"><i class="fa-solid fa-location-dot"></i> ${r.location}</div>
+                            </div>
+                        </div>
+                        <div class="item-footer">
+                            <span style="font-size: 0.8rem; color: #999;">${new Date(r.date).toLocaleDateString('th-TH')}</span>
+                            ${r.status !== 'returned' ? `<button class="btn-card-action" onclick="markReturned(${r.id})">คืนแล้ว</button>` : '<span style="color: var(--primary-blue); font-weight:600; font-size: 0.85rem;">สำเร็จ</span>'}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>
