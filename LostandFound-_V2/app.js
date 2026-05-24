@@ -84,10 +84,55 @@ function openModal(id) { document.getElementById(id).classList.add('active'); }
 function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
 // --- AUTH ---
+function handleStudentLogin() {
+    const id = document.getElementById('studentIdInput').value;
+    const password = document.getElementById('studentPasswordInput').value;
+    
+    if (id.length !== 5) {
+        alert('กรุณาใส่รหัสนักเรียน 5 หลัก');
+        return;
+    }
+    
+    if (!password) {
+        alert('กรุณาใส่รหัสผ่าน');
+        return;
+    }
+    
+    currentUser = { id: id, role: 'student', name: 'นักเรียน' };
+    saveAuth();
+    closeModal('studentLoginModal');
+    window.location.href = 'dashboard.html';
+}
+
+function handleAdminLogin() {
+    const id = document.getElementById('adminIdInput').value;
+    const password = document.getElementById('adminPasswordInput').value;
+    
+    if (!id) {
+        alert('กรุณาใส่รหัสผู้ดูแล');
+        return;
+    }
+    
+    if (!password) {
+        alert('กรุณาใส่รหัสผ่าน');
+        return;
+    }
+    
+    // Admin credentials check (for demo: admin ID '20936')
+    if (id === '20936' && password === 'sapa@69') {
+        currentUser = { id: id, role: 'admin', name: 'ผู้ดูแลระบบ' };
+        saveAuth();
+        closeModal('adminLoginModal');
+        window.location.href = 'admin.html';
+    } else {
+        alert('รหัสผู้ดูแลหรือรหัสผ่านไม่ถูกต้อง');
+    }
+}
+
 function handleLogin() {
     const id = document.getElementById('studentIdInput').value;
-    if (id === 'admin') {
-        currentUser = { id: 'admin', role: 'admin' };
+    if (id === '20936') {
+        currentUser = { id: '20936', role: 'admin', name: 'เสฏฐวุฒิ ศรีภิรมย์' };
         saveAuth();
         window.location.href = 'admin.html';
     } else if (id.length === 5) {
