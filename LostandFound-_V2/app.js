@@ -272,6 +272,45 @@ window.submitReport = async function(type) {
 
 }
 
+window.submitFoundReport = async function () {
+
+    const form = document.getElementById('foundForm');
+
+    const formData = new FormData(form);
+
+    const newReport = {
+
+        finderName: formData.get('reporterName'),
+
+        contactNumber: formData.get('contactNumber'),
+
+        itemType: formData.get('itemType'),
+
+        location: formData.get('location'),
+
+        status: 'found',
+
+        createdAt: new Date()
+
+    };
+
+    try {
+
+        await addDoc(collection(db, "found_reports"), newReport);
+
+        alert('บันทึกข้อมูลของที่พบเรียบร้อยแล้ว!');
+
+        window.location.href = 'history.html';
+
+    } catch(error) {
+
+        console.error(error);
+
+        alert('เกิดข้อผิดพลาด');
+
+    }
+
+}
 window.renderHistory = async function () {
 
     const container = document.getElementById('historyContainer');
