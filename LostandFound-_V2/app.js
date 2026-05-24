@@ -1,3 +1,54 @@
+//--- FIREBASE CONFIG ---
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  orderBy
+} from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC9Y9fOZu6uXV8f5_mZVOU_VqORlu014gs",
+  authDomain: "sapa-lost-and-found.firebaseapp.com",
+  projectId: "sapa-lost-and-found",
+  storageBucket: "sapa-lost-and-found.firebasestorage.app",
+  messagingSenderId: "790156230729",
+  appId: "1:790156230729:web:9df47808e8d9017fcebf98",
+  measurementId: "G-PL1L26HRV5"
+};
+
+const app = initializeApp(firebaseConfig);
+
+const db = getFirestore(app);
+
+console.log("Firestore Connected!");
+
+window.testFirestore = async function () {
+
+  try {
+
+    await addDoc(collection(db, "lost_reports"), {
+
+      itemName: "กระเป๋าสตางค์",
+      location: "โรงอาหาร",
+      status: "lost",
+      createdAt: new Date()
+
+    });
+
+    alert("ส่งข้อมูลเข้า Firestore สำเร็จ!");
+
+  } catch (error) {
+
+    console.error(error);
+    alert("เกิดข้อผิดพลาด");
+
+  }
+
+}
 // --- DATA MANAGEMENT ---
 let currentUser = JSON.parse(localStorage.getItem('sapa_user')) || null;
 let reports = JSON.parse(localStorage.getItem('sapa_reports')) || [
@@ -133,26 +184,171 @@ function initScrollEffects() {
 
 // --- SHARED INITIALIZATION ---
 window.addEventListener('load', () => {
+
     // Apply saved theme
     const savedTheme = localStorage.getItem('sapa_theme') || 'light';
+
     document.documentElement.setAttribute('data-theme', savedTheme);
+
     updateThemeIcon(savedTheme);
 
     updateNav();
+
     if (currentUser) checkMatches();
-    
+
     initScrollEffects();
 
-    // Auto-run page specific renders
+    // Load pages
     const path = window.location.pathname;
-    if (path.includes('history.html')) renderHistory();
-    if (path.includes('search.html')) renderSearch();
-    if (path.includes('admin.html')) renderAdmin();
 
-    // Close modal when clicking outside
-    window.onclick = function(event) {
-        if (event.target.className === 'modal active') {
-            event.target.classList.remove('active');
-        }
+    if (path.includes('history.html')) {
+        renderHistory();
     }
+
+    if (path.includes('search.html')) {
+        renderSearch();
+    }
+
+    if (path.includes('admin.html')) {
+        renderAdmin();
+    }
+
+    // Close modal
+    window.onclick = function(event) {
+
+        if (event.target.className === 'modal active') {
+
+            event.target.classList.remove('active');
+
+        }
+
+    };
+
 });
+
+window.submitReport = async function(type) {
+
+    const form = document.getElementById('lostForm');
+
+    const formData = new FormData(form);
+
+    const newReport = {
+
+        type: type,
+
+        reporterName: formData.get('reporterName'),
+
+        contactNumber: formData.get('contactNumber'),
+
+        itemType: formData.get('itemType'),
+
+        features: formData.get('features'),
+
+        location: formData.get('location'),
+
+        time: formData.get('timeEstimate'),
+
+        status: 'searching',
+
+        createdAt: new Date()
+
+    };
+
+    try {
+
+        await addDoc(collection(db, "lost_reports"), newReport);
+
+        alert('บันทึกข้อมูลเรียบร้อยแล้ว!');
+
+        window.location.href = 'history.html';
+
+    } catch(error) {
+
+        console.error(error);
+
+        alert('เกิดข้อผิดพลาด');
+
+    }
+
+}
+
+window.renderHistory = async function () {
+
+    const container = document.getElementById('historyContainer');
+
+    if (!container) return;
+
+    container.innerHTML = "<p>กำลังโหลดข้อมูล...</p>";
+
+    try {
+
+        const q = query(
+            collection(db, "lost_reports"),
+            orderBy("createdAt", "desc")
+        );
+
+        const querySnapshot = await getDocs(q);
+
+        container.innerHTML = "";
+
+        querySnapshot.forEach((doc) => {
+
+            const data = doc.data();
+
+            container.innerHTML += `
+
+                <div class="item-card">
+
+                    <div class="item-content">
+
+                        <div class="item-status-row">
+                            <span class="status-badge status-searching">
+                                ${data.status || 'searching'}
+                            </span>
+                        </div>
+
+                        <h3 class="item-title">
+                            ${data.features || 'ไม่ระบุ'}
+                        </h3>
+
+                        <div class="item-details">
+
+                            <div class="item-detail-row">
+                                <i class="fa-solid fa-layer-group"></i>
+                                <span>${data.itemType || 'ไม่ระบุ'}</span>
+                            </div>
+
+                            <div class="item-detail-row">
+                                <i class="fa-solid fa-location-dot"></i>
+                                <span>${data.location || 'ไม่ระบุ'}</span>
+                            </div>
+
+                            <div class="item-detail-row">
+                                <i class="fa-solid fa-clock"></i>
+                                <span>${data.time || 'ไม่ระบุ'}</span>
+                            </div>
+
+                            <div class="item-detail-row">
+                                <i class="fa-solid fa-user"></i>
+                                <span>${data.reporterName || 'ไม่ระบุ'}</span>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            `;
+
+        });
+
+    } catch(error) {
+
+        console.error(error);
+
+        container.innerHTML = "<p>โหลดข้อมูลไม่สำเร็จ</p>";
+
+    }
+
+}

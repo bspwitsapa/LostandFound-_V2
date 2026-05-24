@@ -22,18 +22,19 @@
     </nav>
 
     <section class="container">
-        <div class="section-header">
-            <h2 class="section-title">ประวัติการแจ้งรายการของคุณ</h2>
-            <div class="section-line"></div>
-        </div>
-        <div id="history-list" class="items-grid"></div>
-        <div id="no-history" class="text-center hidden" style="padding: 100px;">
-            <i class="fa-solid fa-folder-open" style="font-size: 4rem; color: #ddd; margin-bottom: 20px;"></i>
-            <p style="color: #999;">คุณยังไม่มีประวัติการแจ้งรายการ</p>
-        </div>
-    </section>
 
-    <script src="app.js"></script>
+    <div class="section-header">
+        <h2 class="section-title">ประวัติรายการแจ้งของหาย</h2>
+        <div class="section-line"></div>
+    </div>
+
+    <div id="historyContainer" class="items-grid">
+
+    </div>
+
+</section>
+
+    <script type="module" src="app.js"></script>
     <script>
         function renderHistory() {
             const list = document.getElementById('history-list');

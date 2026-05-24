@@ -84,27 +84,6 @@
         </div>
     </section>
 
-    <script src="app.js"></script>
-    <script>
-        function submitReport(type) {
-            const form = document.getElementById('lostForm');
-            const formData = new FormData(form);
-            const newReport = {
-                id: Date.now(),
-                type: type,
-                name: formData.get('features') || formData.get('itemType'),
-                itemType: formData.get('itemType'),
-                location: formData.get('location'),
-                time: formData.get('timeEstimate') || 'ไม่ระบุ',
-                reporter: currentUser.id,
-                status: 'searching',
-                date: new Date().toISOString()
-            };
-            reports.unshift(newReport);
-            localStorage.setItem('sapa_reports', JSON.stringify(reports));
-            alert('บันทึกข้อมูลเรียบร้อยแล้ว!');
-            window.location.href = 'history.html';
-        }
-    </script>
+    <script type="module" src="app.js"></script>
 </body>
 </html>
