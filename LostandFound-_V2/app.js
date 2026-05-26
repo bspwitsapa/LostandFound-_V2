@@ -7,7 +7,9 @@ import {
   addDoc,
   getDocs,
   query,
-  orderBy
+  orderBy,
+  doc,
+  getDoc
 } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -26,29 +28,6 @@ const db = getFirestore(app);
 
 console.log("Firestore Connected!");
 
-window.testFirestore = async function () {
-
-  try {
-
-    await addDoc(collection(db, "lost_reports"), {
-
-      itemName: "กระเป๋าสตางค์",
-      location: "โรงอาหาร",
-      status: "lost",
-      createdAt: new Date()
-
-    });
-
-    alert("ส่งข้อมูลเข้า Firestore สำเร็จ!");
-
-  } catch (error) {
-
-    console.error(error);
-    alert("เกิดข้อผิดพลาด");
-
-  }
-
-}
 // --- DATA MANAGEMENT ---
 let currentUser = JSON.parse(localStorage.getItem('sapa_user')) || null;
 let reports = JSON.parse(localStorage.getItem('sapa_reports')) || [
@@ -80,28 +59,69 @@ function updateThemeIcon(theme) {
 }
 
 // --- NAVIGATION & UI ---
-function openModal(id) { document.getElementById(id).classList.add('active'); }
-function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+window.openModal = function(id) {
+    document.getElementById(id).classList.add('active');
+}
+
+window.closeModal = function(id) {
+    document.getElementById(id).classList.remove('active');
+}
 
 // --- AUTH ---
-function handleStudentLogin() {
-    const id = document.getElementById('studentIdInput').value;
-    const password = document.getElementById('studentPasswordInput').value;
-    
-    if (id.length !== 5) {
-        alert('กรุณาใส่รหัสนักเรียน 5 หลัก');
-        return;
-    }
-    
+window.handleStudentLogin = async function () {
+
+    const password =
+        document.getElementById("studentPasswordInput").value;
+
     if (!password) {
-        alert('กรุณาใส่รหัสผ่าน');
+
+        alert("กรุณากรอกรหัสผ่าน");
         return;
+
     }
-    
-    currentUser = { id: id, role: 'student', name: 'นักเรียน' };
-    saveAuth();
-    closeModal('studentLoginModal');
-    window.location.href = 'dashboard.html';
+
+    try {
+
+        const response = await fetch(
+            "https://script.google.com/macros/s/AKfycby-J4kzMcDSc1ySXRLJKo2cwmO-b0U5wjAmHPEHtFPSO-vBmNSEqZ_1XJvxNhL2BbKy/exec"
+        );
+
+        const users = await response.json();
+
+        const user = users.find(
+            u => u.password === password
+        );
+
+        if (user) {
+
+            currentUser = {
+                username: user.username,
+                role: user.role
+            };
+
+            localStorage.setItem(
+                "sapa_user",
+                JSON.stringify(currentUser)
+            );
+
+            alert("Login สำเร็จ");
+
+            window.location.href = "dashboard.html";
+
+        } else {
+
+            alert("รหัสผ่านไม่ถูกต้อง");
+
+        }
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("เชื่อมต่อระบบไม่ได้");
+
+    }
+
 }
 
 function handleAdminLogin() {
@@ -436,3 +456,50 @@ window.renderHistory = async function () {
     }
 
 }
+
+window.addEventListener("load", () => {
+
+    const user =
+        JSON.parse(localStorage.getItem("sapa_user"));
+
+    if (user && document.getElementById("displayUsername")) {
+
+        document.getElementById("displayUsername").innerText =
+            user.username;
+
+    }
+
+});
+
+window.addEventListener("load", () => {
+
+    const user =
+        JSON.parse(localStorage.getItem("sapa_user"));
+
+    if (user) {
+
+        // แสดงชื่อด้านบน Navbar
+        const displayUsername =
+            document.getElementById("displayUsername");
+
+        if (displayUsername) {
+
+            displayUsername.innerText =
+                user.username;
+
+        }
+
+        // แสดงชื่อในข้อความต้อนรับ
+        const displayStudentId =
+            document.getElementById("display-student-id");
+
+        if (displayStudentId) {
+
+            displayStudentId.innerText =
+                user.username;
+
+        }
+
+    }
+
+});

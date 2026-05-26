@@ -17,6 +17,7 @@
             <div class="navbar-text-group">
                 <span class="navbar-title">SAPA Lost & Found</span>
                 <span class="navbar-subtitle">Bangsaphanwittaya School</span>
+                <span id="displayUsername"></span>
             </div>
         </div>
         <div class="navbar-right" id="nav-actions">
@@ -42,7 +43,7 @@
 
     <section class="container">
         <div class="section-header">
-            <h2 class="section-title">ยินดีต้อนรับ, คุณ <span id="display-student-id">Student</span></h2>
+            <h2 class="section-title">ยินดีต้อนรับ, <span id="display-student-id">Student</span></h2>
             <div class="section-line"></div>
         </div>
 
@@ -75,7 +76,7 @@
         </div>
     </section>
 
-    <script src="app.js"></script>
+    <script type="module" src="app.js"></script>
     <script>
         if (!currentUser) window.location.href = 'index.html';
     </script>

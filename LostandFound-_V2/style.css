@@ -281,7 +281,7 @@ body {
         url('images/bg.jpg');
     background-size: cover;
     background-position: center;
-    background-attachment: fixed;
+    background-attachment: scroll;
     position: relative;
     border-bottom: 1px solid #eee;
 }
@@ -548,7 +548,13 @@ body {
     justify-content: center;
 }
 
-.modal.active { display: flex; }
+.modal {
+    display: none;
+}
+
+.modal.active {
+    display: flex;
+}
 
 .modal-content {
     background: rgba(255, 255, 255, 0.95);

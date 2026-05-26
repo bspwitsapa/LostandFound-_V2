@@ -16,12 +16,16 @@
             <p style="color: var(--text-muted);">กรุณากรอกข้อมูลเพื่อเข้าสู่ระบบ</p>
             
             <div class="modal-input-wrapper" style="margin-top: 20px;">
-                <input type="text" id="studentIdInput" class="modal-input" placeholder="รหัสนักเรียน 5 หลัก " maxlength="5" style="margin-bottom: 15px;">
-                <input type="password" id="thaiIdInput" class="modal-input" placeholder="เลขบัตรประชาชน 13 หลัก" maxlength="13">
+                <input
+type="password"
+id="studentPasswordInput"
+class="modal-input"
+placeholder="รหัสผ่าน"
+maxlength="5">
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 12px;">
-                <button class="btn btn-register" style="width: 100%; padding: 15px; font-size: 1.1rem;" onclick="handleLogin()">
+                <button class="btn btn-register" style="width: 100%; padding: 15px; font-size: 1.1rem;" onclick="handleStudentLogin()">
                     <i class="fa-solid fa-right-to-bracket"></i> เข้าสู่ระบบ
                 </button>
                 <button class="btn" style="background: transparent; color: #999;" onclick="closeModal('loginModal')">ยกเลิก</button>
@@ -43,7 +47,6 @@
         <div class="navbar-right" id="nav-actions">
             <div id="guest-btns">
                 <button class="btn btn-login" onclick="openModal('loginModal')">เข้าสู่ระบบ</button>
-                <button class="btn btn-register">ลงทะเบียน</button>
             </div>
             <div id="auth-actions" class="hidden">
                 <div class="nav-icons">
