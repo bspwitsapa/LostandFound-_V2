@@ -503,3 +503,80 @@ window.addEventListener("load", () => {
     }
 
 });
+
+
+// ==========================================
+// 🌟 ส่วนที่เพิ่มเข้าไปใหม่: ระบบดึงข้อมูลค้นหาจาก Real Firebase
+// ==========================================
+window.renderSearch = async function() {
+    const list = document.getElementById('search-results');
+    if (!list) return;
+
+    // เติมข้อความระหว่างรอโหลด
+    list.innerHTML = "<p style='text-align:center; grid-column: 1/-1;'>กำลังดึงข้อมูลจากระบบออนไลน์...</p>";
+
+    try {
+        // 1. ดึงข้อมูลจากคอลเลกชัน lost_reports บน Cloud Firestore
+        const q = query(collection(db, "lost_reports"), orderBy("createdAt", "desc"));
+        const querySnapshot = await getDocs(q);
+        
+        let onlineReports = [];
+        querySnapshot.forEach((doc) => {
+            onlineReports.push({ id: doc.id, ...doc.data() });
+        });
+
+        // 2. ตรวจสอบช่องพิมพ์ค้นหาบนหน้าเว็บ search.html
+        const searchInput = document.getElementById('mainSearchInput');
+        const term = searchInput ? searchInput.value.toLowerCase() : "";
+
+        // 3. กรองข้อมูลตามที่พิมพ์ (ค้นหาจาก ชื่อ, สถานที่, ประเภท, ลักษณะ)
+        const filtered = onlineReports.filter(r => 
+            (r.reporterName && r.reporterName.toLowerCase().includes(term)) || 
+            (r.location && r.location.toLowerCase().includes(term)) ||
+            (r.itemType && r.itemType.toLowerCase().includes(term)) ||
+            (r.features && r.features.toLowerCase().includes(term))
+        );
+
+        // 4. สั่งล้างข้อมูลเก่าแล้วเปิดการ์ดข้อมูลชุดจริงขึ้นแสดงผล
+        list.innerHTML = '';
+
+        if (filtered.length === 0) {
+            list.innerHTML = "<p style='text-align:center; grid-column: 1/-1;'>ไม่พบรายการสิ่งของที่ค้นหา</p>";
+            return;
+        }
+
+        filtered.forEach(r => {
+            list.innerHTML += `
+                <div class="item-card">
+                    <div class="item-img-placeholder">
+                        <i class="fa-solid ${r.type === 'lost' ? 'fa-magnifying-glass' : 'fa-box'}"></i>
+                        <span class="item-type-badge badge-${r.type || 'lost'}">${r.type || 'lost'}</span>
+                    </div>
+                    <div class="item-content">
+                        <div class="item-status-row">
+                            <span class="status-badge status-${r.status || 'searching'}">${r.status || 'searching'}</span>
+                        </div>
+                        <span class="item-title">${r.reporterName || 'ไม่ระบุชื่อ'} (${r.itemType || 'ทั่วไป'})</span>
+                        <div class="item-details">
+                            <div class="item-detail-row"><i class="fa-solid fa-location-dot"></i> ${r.location || 'ไม่ระบุสถานที่'}</div>
+                            <div class="item-detail-row"><i class="fa-solid fa-clock"></i> ${r.time || 'ไม่ระบุเวลา'}</div>
+                            <div class="item-detail-row" style="font-size: 0.85em; color: #666; margin-top: 5px;">
+                                <i class="fa-solid fa-asterisk"></i> ลักษณะเด่น: ${r.features || '-'}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        // 5. ดักจับเมื่อผู้ใช้งานมีการกดคีย์บอร์ดพิมพ์ค้นหาในกล่องข้อความ
+        if (searchInput && !searchInput.dataset.listenerAttached) {
+            searchInput.addEventListener('input', () => window.renderSearch());
+            searchInput.dataset.listenerAttached = "true"; // มาร์คไว้เพื่อไม่ให้สร้าง Event ซ้ำซ้อน
+        }
+
+    } catch (error) {
+        console.error("Firebase Search Error: ", error);
+        list.innerHTML = "<p style='text-align:center; grid-column: 1/-1; color:red;'>ระบบขัดข้อง ไม่สามารถดึงข้อมูลได้</p>";
+    }
+};
